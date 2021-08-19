@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "aqupdshark",
+  "version": "${version}",
+  "name": "Shark mob",
+  "description": "This mod adds sharks to the game!",
+  "authors": [
+    "AqUpd",
+    "MrInkognito"
+  ],
+  "contact": {
+    "email": "aquupd@ya.ru",
+    "homepage": "https://vk.com/aqupd",
+    "issues": "https://github.com/AquUpd/SharkMob/issues",
+    "sources": "https://github.com/AquUpd/SharkMob"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.aqupd.sharkmod.Main"
+    ],
+    "client": [
+      "com.aqupd.sharkmod.MainClient"
+    ]
+  },
+  "mixins": [
+    "sharkmod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.6",
+    "minecraft": ">=1.17",
+    "java": ">=16"
+  }
+}
