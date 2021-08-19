@@ -1,5 +1,6 @@
 package com.aqupd.sharkmod.entity;
 
+import com.aqupd.sharkmod.utils.AqConfig;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.ai.control.AquaticLookControl;
@@ -13,29 +14,42 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.AxolotlEntity;
 import net.minecraft.entity.passive.DolphinEntity;
+import net.minecraft.entity.passive.SquidEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 
 public class SharkEntity extends HostileEntity {
     static final TargetPredicate CLOSE_PLAYER_PREDICATE;
     private static final TrackedData<Integer> MOISTNESS;
 
+    private static double health = AqConfig.INSTANCE.getDoubleProperty("entity.health");
+    private static double speed = AqConfig.INSTANCE.getDoubleProperty("entity.speed");
+    private static double follow = AqConfig.INSTANCE.getDoubleProperty("entity.follow");
+    private static double damage = AqConfig.INSTANCE.getDoubleProperty("entity.damage");
+    private static double knockback = AqConfig.INSTANCE.getDoubleProperty("entity.knockback");
+
     public SharkEntity(EntityType<? extends SharkEntity> entityType, World world) {
         super(entityType, world);
         this.moveControl = new AquaticMoveControl(this, 85, 10, 0.02F, 0.1F, true);
-        this.lookControl = new AquaticLookControl(this, 10);
+        this.lookControl = new AquaticLookControl(this, 25);
     }
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
@@ -71,33 +85,24 @@ public class SharkEntity extends HostileEntity {
     }
 
     protected void initGoals() {
-        this.goalSelector.add(0, new BreatheAirGoal(this));
         this.goalSelector.add(0, new MoveIntoWaterGoal(this));
-        this.goalSelector.add(4, new SwimAroundGoal(this, 1.0D, 10));
-        this.goalSelector.add(4, new LookAroundGoal(this));
-        this.goalSelector.add(6, new MeleeAttackGoal(this, 2.2000000476837158D, false));
-        this.goalSelector.add(8, new ChaseBoatGoal(this));
-        this.targetSelector.add(2, new FollowTargetGoal<>(this, LivingEntity.class, false));
+        this.goalSelector.add(4, new MeleeAttackGoal(this, 1.2000000476837158D, true));
+        this.goalSelector.add(6, new SwimAroundGoal(this, 0.50, 2));
+        this.targetSelector.add(1, new FollowTargetGoal<>(this, PlayerEntity.class, 10, true, true, new InWaterPredicate(this)));
+        this.targetSelector.add(2, new FollowTargetGoal<>(this, WaterCreatureEntity.class, 10, false, true, new InWaterPredicate(this)));
+        this.targetSelector.add(3, new FollowTargetGoal<>(this, AnimalEntity.class, 10, false, true, new InWaterPredicate(this)));
     }
 
     public static DefaultAttributeContainer.Builder createSharkAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 10.0D)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 1.2000000476837158D)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 6.0D);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, health)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, speed)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, damage)
+                .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, knockback)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, follow);
     }
     protected EntityNavigation createNavigation(World world) {
         return new SwimNavigation(this, world);
-    }
-
-    public boolean tryAttack(Entity target) {
-        boolean bl = target.damage(DamageSource.mob(this), (float)((int)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE)));
-        if (bl) {
-            this.applyDamageEffects(this, target);
-            this.playSound(SoundEvents.ENTITY_DOLPHIN_ATTACK, 1.0F, 1.0F);
-        }
-
-        return bl;
     }
 
     public int getMaxAir() {
@@ -127,6 +132,7 @@ public class SharkEntity extends HostileEntity {
         } else {
             if (this.isWet()) {
                 this.setMoistness(2400);
+                this.setAir(4800);
             } else {
                 this.setMoistness(this.getMoistness() - 1);
                 if (this.getMoistness() <= 0) {
@@ -216,5 +222,27 @@ public class SharkEntity extends HostileEntity {
     static {
         MOISTNESS = DataTracker.registerData(DolphinEntity.class, TrackedDataHandlerRegistry.INTEGER);
         CLOSE_PLAYER_PREDICATE = TargetPredicate.createNonAttackable().setBaseMaxDistance(10.0D).ignoreVisibility();
+    }
+
+    @Override
+    public boolean canSpawn(WorldView world) {
+        return world.containsFluid(this.getBoundingBox()) && world.intersectsEntities(this);
+    }
+
+    public static boolean canSpawnIgnoreLightLevel(WorldAccess world) {
+        return world.getDifficulty() != Difficulty.PEACEFUL;
+    }
+
+    static class InWaterPredicate implements Predicate<LivingEntity> {
+        private final SharkEntity owner;
+
+        public InWaterPredicate(SharkEntity owner) {
+            this.owner = owner;
+        }
+
+        public boolean test(@Nullable LivingEntity entity) {
+            assert entity != null;
+            return entity.isSwimming();
+        }
     }
 }

@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier;
 public class SharkEntityRenderer extends MobEntityRenderer<SharkEntity, SharkEntityModel<SharkEntity>> {
 
     public SharkEntityRenderer(EntityRendererFactory.Context context) {
-        super(context, new SharkEntityModel<SharkEntity>(context.getPart(MainClient.SHARK_MODEL_LAYER)), 1.0f);
+        super(context, new SharkEntityModel<>(context.getPart(MainClient.SHARK_MODEL_LAYER)), 1.0f);
     }
 
     @Override
@@ -23,6 +23,6 @@ public class SharkEntityRenderer extends MobEntityRenderer<SharkEntity, SharkEnt
     }
 
     protected void scale(SharkEntity sharkEntity, MatrixStack matrixStack, float f) {
-        matrixStack.scale(2.0F, 2.0F, 2.0F);
+        matrixStack.scale(1.75F, 1.75F, 1.75F);
     }
 }

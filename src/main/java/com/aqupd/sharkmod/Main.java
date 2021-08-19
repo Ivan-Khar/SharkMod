@@ -32,8 +32,8 @@ public class Main implements ModInitializer {
     public static final EntityType<SharkEntity> SHARK = Registry.register(
             Registry.ENTITY_TYPE,
             SHARK_ID,
-            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE,
-                    SharkEntity::new).dimensions(EntityDimensions.changing(1.0f, 1.0f)).build()
+            FabricEntityTypeBuilder.create(SpawnGroup.WATER_CREATURE,
+                    SharkEntity::new).dimensions(EntityDimensions.fixed(1.2f, 0.6f)).build()
     );
     public static final SpawnEggItem SHARK_SPAWN_EGG = new SpawnEggItem(SHARK, 253948, 19799, new FabricItemSettings().group(ItemGroup.MISC).fireproof().maxCount(64));
 
@@ -47,7 +47,7 @@ public class Main implements ModInitializer {
 
         BiomeModifications.addSpawn(
                 selection -> Arrays.stream(biomelist).anyMatch(x -> x.equals(selection.getBiome().getCategory().getName().toUpperCase())),
-                SpawnGroup.CREATURE,
+                SpawnGroup.WATER_CREATURE,
                 SHARK,
                 weight, mingroup, maxgroup // weight/min group size/max group size
         );
