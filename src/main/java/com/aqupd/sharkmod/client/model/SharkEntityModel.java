@@ -11,6 +11,7 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.util.math.MathHelper;
 
 import static com.aqupd.sharkmod.utils.AqLogger.logInfo;
 
@@ -105,12 +106,6 @@ public class SharkEntityModel<C extends HostileEntity> extends EntityModel<Shark
     }
     @Override
     public void setAngles(SharkEntity sharkEntity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch){
-        double newanimationProgress = animationProgress % 360;
-        newanimationProgress = (newanimationProgress + 360) % 360;
-        newanimationProgress = newanimationProgress - 180;
-        newanimationProgress = Math.toRadians(newanimationProgress);
-        float newanim = (float)newanimationProgress;
-
         setRotationAngle(teeth_r1, 0.0F, 0.0F, -0.7854F);
         setRotationAngle(teeth_r2, -0.567F, 0.4929F, -0.9317F);
         setRotationAngle(teeth_r3, 0.0F, 0.0F, -0.7854F);
@@ -126,14 +121,22 @@ public class SharkEntityModel<C extends HostileEntity> extends EntityModel<Shark
         setRotationAngle(fin_r1, 0.9599F, 0.0F, 0.0F);
         setRotationAngle(fin_r2, 0.0F, 0.1745F, -0.1745F);
         setRotationAngle(fin_r3, 0.0F, -0.1745F, 0.1745F);
+        main.setPivot(1.0F, 20.5F, 0.0F);
 
-        main.setPivot(1.0F, 20.5F, -10.0F);
         setRotationAngle(main, (headPitch * 0.012453292F), (headYaw * 0.012453292F), 0.0F);
         setRotationAngle(head, (headPitch * 0.0027453292F), (headYaw * 0.0327453292F), 0.0F);
-        setRotationAngle(backfin1, 0.0F, newanim, 0.0F);
 
+        if (sharkEntity.getVelocity().horizontalLengthSquared() > 1.0E-7D) {
+            this.backfin.yaw = -0.15F * MathHelper.cos(animationProgress * 0.4F);
+            this.backfin1.yaw = -0.2F * MathHelper.cos(animationProgress * 0.4F);
+            this.backfin2.yaw = -0.3F * MathHelper.cos(animationProgress * 0.4F);
+            this.backfin3.yaw = -0.4F * MathHelper.cos(animationProgress * 0.4F);
+            this.head.yaw = -0.05F * MathHelper.cos(animationProgress * 0.4F);
 
-        logInfo(String.valueOf(newanim) + " " + String.valueOf(animationProgress));
+            this.rfin.roll = 0.4F * MathHelper.cos(animationProgress * 0.4F);
+            this.lfin.roll = -0.4F * MathHelper.cos(animationProgress * 0.43F);
+        }
+
     }
     @Override
     public void render(MatrixStack matrixStack, VertexConsumer	buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha){
