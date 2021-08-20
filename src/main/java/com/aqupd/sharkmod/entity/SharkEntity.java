@@ -58,10 +58,6 @@ public class SharkEntity extends HostileEntity {
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     }
 
-    public boolean canBreatheInWater() {
-        return false;
-    }
-
     public int getMoistness() {
         return this.dataTracker.get(MOISTNESS);
     }
@@ -87,6 +83,7 @@ public class SharkEntity extends HostileEntity {
     protected void initGoals() {
         this.goalSelector.add(0, new MoveIntoWaterGoal(this));
         this.goalSelector.add(4, new MeleeAttackGoal(this, 1.2000000476837158D, true));
+        this.goalSelector.add(5, new LookAtEntityGoal(this, PlayerEntity.class, 12.0F));
         this.goalSelector.add(6, new SwimAroundGoal(this, 0.50, 2));
         this.targetSelector.add(1, new FollowTargetGoal<>(this, PlayerEntity.class, 10, true, true, new InWaterPredicate(this)));
         this.targetSelector.add(2, new FollowTargetGoal<>(this, WaterCreatureEntity.class, 10, false, true, new InWaterPredicate(this)));
@@ -114,7 +111,7 @@ public class SharkEntity extends HostileEntity {
     }
 
     protected float getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions) {
-        return 0.3F;
+        return 0.5F;
     }
 
     public int getLookPitchSpeed() {
@@ -229,10 +226,6 @@ public class SharkEntity extends HostileEntity {
         return world.containsFluid(this.getBoundingBox()) && world.intersectsEntities(this);
     }
 
-    public static boolean canSpawnIgnoreLightLevel(WorldAccess world) {
-        return world.getDifficulty() != Difficulty.PEACEFUL;
-    }
-
     static class InWaterPredicate implements Predicate<LivingEntity> {
         private final SharkEntity owner;
 
@@ -241,8 +234,7 @@ public class SharkEntity extends HostileEntity {
         }
 
         public boolean test(@Nullable LivingEntity entity) {
-            assert entity != null;
-            return entity.isSwimming();
+            return entity != null && entity.isTouchingWater();
         }
     }
 }

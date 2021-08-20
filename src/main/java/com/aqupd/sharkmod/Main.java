@@ -33,7 +33,7 @@ public class Main implements ModInitializer {
             Registry.ENTITY_TYPE,
             SHARK_ID,
             FabricEntityTypeBuilder.create(SpawnGroup.WATER_CREATURE,
-                    SharkEntity::new).dimensions(EntityDimensions.fixed(1.2f, 0.6f)).build()
+                    SharkEntity::new).dimensions(EntityDimensions.fixed(1.2f, 0.9f)).build()
     );
     public static final SpawnEggItem SHARK_SPAWN_EGG = new SpawnEggItem(SHARK, 253948, 19799, new FabricItemSettings().group(ItemGroup.MISC).fireproof().maxCount(64));
 
