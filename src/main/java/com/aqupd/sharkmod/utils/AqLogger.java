@@ -10,6 +10,10 @@ public class AqLogger {
         LOGGER.error("[AqUpd's Mobs] " + error);
     }
 
+    public static void logWarn(String warn) {
+        LOGGER.warn("[AqUpd's Mobs] " + warn);
+    }
+
     public static void logInfo(String info) {
         LOGGER.info("[AqUpd's Mobs] " + info);
     }

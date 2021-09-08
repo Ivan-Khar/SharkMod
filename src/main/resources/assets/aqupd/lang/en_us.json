@@ -1,4 +1,6 @@
 {
   "entity.aqupd.shark": "Shark",
-  "item.aqupd.shark_spawn_egg": "Shark Spawn Egg"
+  "item.aqupd.shark_spawn_egg": "Shark Spawn Egg",
+  "subtitles.aqupd.shark_splash": "Shark splashes",
+  "subtitles.aqupd.shark_death": "Shark dies"
 }

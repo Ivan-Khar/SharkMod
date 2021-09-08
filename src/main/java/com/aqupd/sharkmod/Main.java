@@ -14,6 +14,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.SpawnEggItem;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -27,6 +28,9 @@ public class Main implements ModInitializer {
     int mingroup = AqConfig.INSTANCE.getNumberProperty("spawn.min");
     int maxgroup = AqConfig.INSTANCE.getNumberProperty("spawn.max");
     String[] biomelist = AqConfig.INSTANCE.getStringProperty("spawn.biomes").split(",");
+
+    public static SoundEvent SHARK_SPLASH = new SoundEvent(new Identifier("aqupd:shark_splash"));
+    public static SoundEvent SHARK_DEATH = new SoundEvent(new Identifier("aqupd:shark_death"));
 
     public static Identifier SHARK_ID = new Identifier("aqupd", "shark");
     public static final EntityType<SharkEntity> SHARK = Registry.register(

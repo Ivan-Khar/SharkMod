@@ -1,5 +1,6 @@
 package com.aqupd.sharkmod.entity;
 
+import com.aqupd.sharkmod.Main;
 import com.aqupd.sharkmod.utils.AqConfig;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.TargetPredicate;
@@ -14,16 +15,12 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.GuardianEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.AxolotlEntity;
 import net.minecraft.entity.passive.DolphinEntity;
-import net.minecraft.entity.passive.SquidEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundEvent;
@@ -34,6 +31,10 @@ import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
+
+import static com.aqupd.sharkmod.utils.AqLogger.logInfo;
+import static com.aqupd.sharkmod.utils.AqLogger.logWarn;
+import static com.aqupd.sharkmod.utils.AqLogger.logError;
 
 
 public class SharkEntity extends HostileEntity {
@@ -146,38 +147,18 @@ public class SharkEntity extends HostileEntity {
                 }
             }
 
-            if (this.world.isClient && this.isTouchingWater() && this.getVelocity().lengthSquared() > 0.03D) {
+            if (this.world.isClient && this.isTouchingWater() && this.isAttacking()) {
                 Vec3d vec3d = this.getRotationVec(0.0F);
-                float f = MathHelper.cos(this.getYaw() * 0.017453292F) * 0.3F;
-                float g = MathHelper.sin(this.getYaw() * 0.017453292F) * 0.3F;
-                float h = 1.2F - this.random.nextFloat() * 0.7F;
+                float f = MathHelper.cos(this.getYaw() * 0.017453292F) * 0.6F;
+                float g = MathHelper.sin(this.getYaw() * 0.017453292F) * 0.6F;
+                float h = 0.0F - this.random.nextFloat() * 0.7F;
 
                 for(int i = 0; i < 2; ++i) {
-                    this.world.addParticle(ParticleTypes.DOLPHIN, this.getX() - vec3d.x * (double)h + (double)f, this.getY() - vec3d.y, this.getZ() - vec3d.z * (double)h + (double)g, 0.0D, 0.0D, 0.0D);
-                    this.world.addParticle(ParticleTypes.DOLPHIN, this.getX() - vec3d.x * (double)h - (double)f, this.getY() - vec3d.y, this.getZ() - vec3d.z * (double)h - (double)g, 0.0D, 0.0D, 0.0D);
+                    this.world.addParticle(ParticleTypes.BUBBLE, this.getX() - vec3d.x * (double)h + (double)f, this.getY() - vec3d.y, this.getZ() - vec3d.z * (double)h + (double)g, 0.0D, 0.0D, 0.0D);
+                    this.world.addParticle(ParticleTypes.BUBBLE, this.getX() - vec3d.x * (double)h - (double)f, this.getY() - vec3d.y, this.getZ() - vec3d.z * (double)h - (double)g, 0.0D, 0.0D, 0.0D);
                 }
             }
-
         }
-    }
-
-    public void handleStatus(byte status) {
-        if (status == 38) {
-            this.spawnParticlesAround();
-        } else {
-            super.handleStatus(status);
-        }
-
-    }
-
-    private void spawnParticlesAround() {
-        for(int i = 0; i < 7; ++i) {
-            double d = this.random.nextGaussian() * 0.01D;
-            double e = this.random.nextGaussian() * 0.01D;
-            double f = this.random.nextGaussian() * 0.01D;
-            this.world.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getParticleX(1.0D), this.getRandomBodyY() + 0.2D, this.getParticleZ(1.0D), d, e, f);
-        }
-
     }
 
     protected SoundEvent getHurtSound(DamageSource source) {
@@ -186,7 +167,7 @@ public class SharkEntity extends HostileEntity {
 
     @Nullable
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_DOLPHIN_DEATH;
+        return Main.SHARK_DEATH;
     }
 
     @Nullable
@@ -195,7 +176,7 @@ public class SharkEntity extends HostileEntity {
     }
 
     protected SoundEvent getSplashSound() {
-        return SoundEvents.ENTITY_DOLPHIN_SPLASH;
+        return Main.SHARK_SPLASH;
     }
 
     protected SoundEvent getSwimSound() {
@@ -217,7 +198,7 @@ public class SharkEntity extends HostileEntity {
     }
 
     static {
-        MOISTNESS = DataTracker.registerData(DolphinEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        MOISTNESS = DataTracker.registerData(SharkEntity.class, TrackedDataHandlerRegistry.INTEGER);
         CLOSE_PLAYER_PREDICATE = TargetPredicate.createNonAttackable().setBaseMaxDistance(10.0D).ignoreVisibility();
     }
 
