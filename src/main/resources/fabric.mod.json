@@ -14,7 +14,7 @@
     "issues": "https://github.com/AquUpd/SharkMob/issues",
     "sources": "https://github.com/AquUpd/SharkMob"
   },
-  "license": "MIT",
+  "license": "CC BY-NC 3.0",
   "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
